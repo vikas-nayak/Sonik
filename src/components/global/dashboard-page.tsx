@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from '../ui/skeleton';
 
 export default function UploadPage() {
   const [file, setFile] = useState(null);
   const [text, setText] = useState('hello');
   const [audioUrl, setAudioUrl] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleFileChange = (event: any) => {
     setFile(event.target.files[0]);
@@ -26,6 +28,8 @@ export default function UploadPage() {
     const formData = new FormData();
     formData.append('audioFile', file);
     formData.append('inputText', text);
+
+    setLoading(true);
 
     try {
       const response = await fetch('/api/test', {
@@ -48,6 +52,10 @@ export default function UploadPage() {
     } catch (error) {
       console.error('Error:', error);
     }
+    finally {
+      setLoading(false);
+    }
+
   };
 
   return (
@@ -75,14 +83,21 @@ export default function UploadPage() {
             </div>
             <Button type="submit" className="w-full">Upload</Button>
           </form>
+          
+          <div className="mt-6 text-center">
+            {loading ? (
+              <Skeleton className="h-8 w-[400px] mx-auto" />
+            ) : (
+              audioUrl && (
+                <div>
+                  <p className="truncate max-w-full" title={audioUrl}>
+                    Audio URL: <a href={audioUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">{audioUrl}</a>
+                  </p>
+                </div>
+              )
+            )}
+          </div>
 
-          {audioUrl && (
-            <div className="mt-6 text-center">
-              <p className="truncate max-w-full" title={audioUrl}>
-                Audio URL: <a href={audioUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">{audioUrl}</a>
-              </p>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>

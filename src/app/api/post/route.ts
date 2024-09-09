@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { client } from "@gradio/client";
 
 
-export async function POST(req) {
+export async function POST(req:any) {
   
   try {
     const { userId }: { userId: string | null } = getAuth(req);  // Clerk se current user ka ID le lo
@@ -21,7 +21,7 @@ export async function POST(req) {
     }
 
     const app = await client("tonyassi/voice-clone");
-    const result = await app.predict("/predict", [inputText, audioFile]);
+    const result:any = await app.predict("/predict", [inputText, audioFile]);
     const predictionData = result.data[0]; // Extract the object
     const predictionUrl = predictionData.url; // Get the URL string
     

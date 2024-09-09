@@ -1,29 +1,36 @@
 "use client";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "../ui/skeleton";
-import Sidebar from "@/components/global/sidebar"; // import Sidebar component
+import Sidebar from "@/components/global/sidebar";
 import Topbar from "./topbar";
+import { useAuth } from "@clerk/nextjs"; // Clerk hooks
 
 export default function UploadPage() {
+  const { isLoaded, isSignedIn } = useAuth(); // Check if user is signed in
+
   const [file, setFile] = useState(null);
   const [text, setText] = useState("hello");
   const [audioUrl, setAudioUrl] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const handleFileChange = (event: any) => {
+  const handleFileChange = (event) => {
     setFile(event.target.files[0]);
   };
 
-  const handleSubmit = async (event: any) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (!file || !text) {
       alert("Please select a file and enter some text first");
+      return;
+    }
+
+    if (!isSignedIn) {
+      alert("Please sign in to upload audio.");
       return;
     }
 
@@ -34,21 +41,23 @@ export default function UploadPage() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/test", {
+      const response = await fetch("/api/post", {
         method: "POST",
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        throw new Error(`Network response was not ok: ${response.statusText}`);
       }
 
       const result = await response.json();
 
-      if (result.audioUrl) {
-        setAudioUrl(result.audioUrl.url); // Access the URL property of the object
+      // Check if result contains predictionUrl
+      if (result.predictionUrl && typeof result.predictionUrl === 'string') {
+        console.log("Retrieved Prediction URL:", result.predictionUrl); // Debugging
+        setAudioUrl(result.predictionUrl); // Assuming `predictionUrl` is a string with the URL
       } else {
-        console.error("Failed to retrieve the audio URL");
+        console.error("Failed to retrieve the prediction URL. Response:", result);
       }
     } catch (error) {
       console.error("Error:", error);
@@ -57,17 +66,22 @@ export default function UploadPage() {
     }
   };
 
+  if (!isLoaded) {
+    return <div>Loading...</div>;
+  }
+
+  // Debugging: Ensure audioUrl has a valid value
+  useEffect(() => {
+    console.log("Audio URL State:", audioUrl);
+  }, [audioUrl]);
+
   return (
     <div className="h-screen grid grid-cols-[218px_1fr]">
-      {/* Sidebar */}
-      <Sidebar /> 
+      <Sidebar />
 
-      {/* Main content */}
       <div className="flex flex-col w-full">
-        {/* Topbar */}
         <Topbar />
 
-        {/* Form and Upload */}
         <div className="flex justify-center items-center flex-grow">
           <Card className="w-full max-w-md shadow-lg">
             <CardHeader>

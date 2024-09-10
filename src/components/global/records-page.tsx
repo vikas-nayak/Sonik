@@ -154,7 +154,7 @@ function RecordsPage() {
                         onClick={() => handleDelete(record.id)} 
                         className="text-red-500"
                       >
-                        <LucideTrash2 size={20} />
+                        <LucideTrash2 size={20} className='text-black mr-4' />
                       </button>
                     </TableCell>
                   </TableRow>

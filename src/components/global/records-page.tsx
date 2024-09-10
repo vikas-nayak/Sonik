@@ -9,11 +9,10 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import React, { useState } from 'react';
-import { Input } from '@/components/ui/input'; // Shadcn Input
-import { LucideSearch } from 'lucide-react'; // Lucide Search Icon
+import React, { useState, useEffect } from 'react';
+import { Input } from '@/components/ui/input';
+import { LucideSearch, LucideTrash2 } from 'lucide-react';
 
-// Importing the pagination components from Shadcn
 import {
   Pagination,
   PaginationContent,
@@ -24,32 +23,38 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
-const mockRecords = [
-  {
-    id: 1,
-    fileName: "sonik1.wav",
-    dateProcessed: "2024-09-08",
-    status: "Completed",
-    processedUrl: "/path/to/sonik1.wav",
-  },
-  {
-    id: 2,
-    fileName: "sonik2.mp3",
-    dateProcessed: "2024-09-07",
-    status: "In Progress",
-    processedUrl: "/path/to/sonik2.mp3",
-  },
-  // Add more records here...
-];
+import { useUser } from '@clerk/nextjs';
 
-const ITEMS_PER_PAGE = 5; // Number of items per page
+const ITEMS_PER_PAGE = 5;
 
 function RecordsPage() {
+  const { user } = useUser();
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [records, setRecords] = useState([]);
+  // const [loading, setLoading] = useState(true);
 
-  const filteredRecords = mockRecords.filter((record) =>
-    record.fileName.toLowerCase().includes(searchQuery.toLowerCase())
+  // Fetch data from the backend API
+  useEffect(() => {
+    const fetchRecords = async () => {
+      if (!user?.id) return;
+
+      try {
+        const res = await fetch(`/api/fetch?userId=${user.id}`);
+        const data = await res.json();
+        setRecords(data);
+        // setLoading(false);
+      } catch (error) {
+        console.error("Error fetching audio data:", error);
+        // setLoading(false);
+      }
+    };
+
+    fetchRecords();
+  }, [user?.id]);
+
+  const filteredRecords = records.filter((record: any) =>
+    record.fileUrl.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Pagination Logic
@@ -59,19 +64,45 @@ function RecordsPage() {
     currentPage * ITEMS_PER_PAGE
   );
 
-  const handlePlayAudio = (url: string) => {
-    console.log(`Playing: ${url}`);
+  const truncateText = (text: string, maxLength: number) => {
+    return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
   };
 
-  const handleDownloadAudio = (url: string) => {
-    console.log(`Downloading: ${url}`);
+  //function to delete a record
+  const handleDelete = async (id: string) => {
+    try {
+      const userId = user?.id;
+      if (!userId) {
+        console.error("User not authenticated");
+        return;
+      }
+  
+      const response = await fetch(`/api/delete?userId=${userId}&id=${id}`, {
+        method: 'DELETE',
+      });
+  
+      if (response.ok) {
+        console.log("Record deleted successfully");
+        //@ts-ignore
+        setRecords(records.filter(record => record.id !== id));
+      } else {
+        const errorData = await response.json();
+        console.error("Error deleting record:", errorData.error);
+      }
+    } catch (error) {
+      console.error("Error in delete request:", error);
+    }
   };
+  
+  
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
     }
   };
+
+  // if (loading) return <p className="text-center text-white">Loading...</p>;
 
   return (
     <div className="h-screen grid grid-cols-[218px_1fr] bg-black">
@@ -98,6 +129,7 @@ function RecordsPage() {
             <TableHeader className="bg-gray-100">
               <TableRow>
                 <TableHead className="w-[150px] p-4">File Name</TableHead>
+                <TableHead className="w-[300px] p-4">Input Text</TableHead>
                 <TableHead className="p-4">Date Processed</TableHead>
                 <TableHead className="p-4">Status</TableHead>
                 <TableHead className="text-right p-4">Actions</TableHead>
@@ -105,37 +137,37 @@ function RecordsPage() {
             </TableHeader>
             <TableBody>
               {paginatedRecords.length > 0 ? (
-                paginatedRecords.map((record) => (
+                paginatedRecords.map((record: any) => (
                   <TableRow key={record.id} className="hover:bg-gray-50">
-                    <TableCell className="font-medium p-4">{record.fileName}</TableCell>
-                    <TableCell className="p-4">{record.dateProcessed}</TableCell>
-                    <TableCell className="p-4">{record.status}</TableCell>
+                    <TableCell className="font-medium p-4">
+                      {truncateText(record.fileUrl.split('/').pop(), 20)}
+                    </TableCell>
+                    <TableCell className="p-4">
+                      {truncateText(record.inputText, 50)}
+                    </TableCell>
+                    <TableCell className="p-4">
+                      {new Date(record.createdAt).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="p-4">Completed</TableCell>
                     <TableCell className="text-right p-4">
                       <button 
-                        onClick={() => handlePlayAudio(record.processedUrl)} 
-                        className="mr-4 text-blue-500"
+                        onClick={() => handleDelete(record.id)} 
+                        className="text-red-500"
                       >
-                        Play
-                      </button>
-                      <button 
-                        onClick={() => handleDownloadAudio(record.processedUrl)} 
-                        className="text-green-500"
-                      >
-                        Download
+                        <LucideTrash2 size={20} />
                       </button>
                     </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center p-4">No records found.</TableCell>
+                  <TableCell colSpan={5} className="text-center p-4">No records found.</TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
         </div>
 
-        {/* Pagination Component */}
         <div className="mt-6 flex justify-center">
           <Pagination>
             <PaginationContent>
@@ -146,7 +178,6 @@ function RecordsPage() {
                 />
               </PaginationItem>
 
-              {/* Generate Pagination Links */}
               {Array.from({ length: totalPages }, (_, i) => (
                 <PaginationItem key={i}>
                   <PaginationLink 

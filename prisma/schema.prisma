@@ -25,7 +25,7 @@ model User {
 }
 
 model AudioFile {
-  id         String    @id @default(uuid())
+  id         String    @id @unique @default(uuid())
   userId     String
   fileUrl    String     // Store the URL or path of the audio file
   inputText  String     // Store the user input text

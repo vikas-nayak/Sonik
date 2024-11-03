@@ -181,13 +181,13 @@ export default function RedesignedSignUpPage() {
                                 className="text-yellow-200/70"
                                 fallback={({ resendableAfter }) => (
                                   <Button variant="link" size="sm" disabled className="text-yellow-200/30">
-                                    Didn't receive a code? Resend (
+                                    Did not receive a code? Resend (
                                     <span className="tabular-nums">{resendableAfter}</span>)
                                   </Button>
                                 )}
                               >
                                 <Button variant="link" size="sm" className="text-yellow-200 hover:text-yellow-300">
-                                  Didn't receive a code? Resend
+                                  Did not receive a code? Resend
                                 </Button>
                               </SignUp.Action>
                             </div>

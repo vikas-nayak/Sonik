@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db'; // Assuming you have a prisma instance setup
-import { getAuth } from '@clerk/nextjs/server';
+import { db } from '@/lib/db';
 
 // GET method
 export async function GET(req: NextRequest) {

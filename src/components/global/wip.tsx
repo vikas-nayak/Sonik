@@ -12,7 +12,7 @@ export default function WorkInProgressPage() {
                 </div>
                 <h1 className="text-2xl md:text-4xl font-bold text-blue-600">Work in Progress</h1>
                 <p className="text-xl md:text-2xl font-bold text-blue-600">
-                    I am currently building section. Check back soon!
+                    I am currently building this part of the site. Check back soon!
                 </p>
             </div>
         </div>

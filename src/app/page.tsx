@@ -107,7 +107,7 @@ export default function LandingPage() {
                   href="/dashboard/new-sonik"
                   onClick={handleNavClick}
                 >
-                  <Button className="w-full bg-yellow-200 text-blue-600 hover:bg-yellow-300">
+                  <Button className="w-full bg-yellow-200 text-blue-600 hover:bg-yellow-300 hidden md:block">
                     Get Started
                   </Button>
                 </Link>
@@ -256,7 +256,7 @@ export default function LandingPage() {
                           </li>
                         ))}
                       </ul>
-                      <Button className="w-full mt-8 bg-blue-600 text-yellow-200 hover:bg-blue-700">
+                      <Button className="w-full mt-8 bg-blue-600 text-yellow-200 hover:bg-blue-700 ">
                         Get Started
                       </Button>
                     </CardContent>

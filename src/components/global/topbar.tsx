@@ -12,11 +12,10 @@ import {
 function Topbar() {
   return (
     <div className="flex justify-between items-center p-2 md:p-4 bg-blue-600 border-b-4 border-yellow-200">
-      <div className="w-16 md:w-auto md:flex-1"> {/* Spacer for mobile menu button */}
+      <div className="w-16 md:w-auto md:flex-1">
         <h1 className="hidden md:block text-3xl font-bold text-yellow-200">Sonik</h1>
       </div>
       
-      {/* Center text for mobile only */}
       <h1 className="md:hidden text-xl font-bold text-yellow-200 absolute left-1/2 -translate-x-1/2">Sonik</h1>
       
       <div className="flex items-center space-x-2 md:space-x-4">
@@ -30,9 +29,6 @@ function Topbar() {
                 Help
               </Button>
             </TooltipTrigger>
-            <TooltipContent className="bg-fuchsia-300 text-blue-600 border-2 border-blue-600 text-sm md:text-base">
-              <p>Need assistance? Click here!</p>
-            </TooltipContent>
           </Tooltip>
         </TooltipProvider>
         <UserButton 

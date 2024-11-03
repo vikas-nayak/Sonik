@@ -1,18 +1,19 @@
-"use client";
-import Sidebar from '@/components/global/sidebar';
-import { 
-  Table, 
-  TableBody, 
-  TableCaption, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
-import React, { useState, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
-import { LucideSearch, LucideTrash2 } from 'lucide-react';
+'use client'
 
+import { useState, useEffect } from 'react'
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Search, Trash2 } from "lucide-react"
+import { useUser } from '@clerk/nextjs'
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import {
   Pagination,
   PaginationContent,
@@ -21,189 +22,166 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
+} from "@/components/ui/pagination"
 
-import { useUser } from '@clerk/nextjs';
+type Record = {
+  id: string
+  fileUrl: string
+  inputText: string
+  createdAt: string
+}
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 5
 
-function RecordsPage() {
-  const { user } = useUser();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [records, setRecords] = useState([]);
-  // const [loading, setLoading] = useState(true);
+export default function Records() {
+  const { user } = useUser()
+  const [searchQuery, setSearchQuery] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
+  const [records, setRecords] = useState<Record[]>([])
+  const [loading, setLoading] = useState(true)
 
-  // Fetch data from the backend API
   useEffect(() => {
     const fetchRecords = async () => {
-      if (!user?.id) return;
+      if (!user?.id) return
 
+      setLoading(true)
       try {
-        const res = await fetch(`/api/fetch?userId=${user.id}`);
-        const data = await res.json();
-        setRecords(data);
-        // setLoading(false);
+        const res = await fetch(`/api/fetch?userId=${user.id}`)
+        const data = await res.json()
+        setRecords(data)
       } catch (error) {
-        console.error("Error fetching audio data:", error);
-        // setLoading(false);
+        console.error("Error fetching audio data:", error)
+      } finally {
+        setLoading(false)
       }
-    };
+    }
 
-    fetchRecords();
-  }, [user?.id]);
+    fetchRecords()
+  }, [user?.id])
 
-  const filteredRecords = records.filter((record: any) =>
+  const filteredRecords = records.filter((record) =>
     record.fileUrl.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  )
 
-  // Pagination Logic
-  const totalPages = Math.ceil(filteredRecords.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(filteredRecords.length / ITEMS_PER_PAGE)
   const paginatedRecords = filteredRecords.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
-  );
+  )
 
-  const truncateText = (text: string, maxLength: number) => {
-    return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
-  };
-
-  //function to delete a record
   const handleDelete = async (id: string) => {
     try {
-      const userId = user?.id;
+      const userId = user?.id
       if (!userId) {
-        console.error("User not authenticated");
-        return;
+        console.error("User not authenticated")
+        return
       }
-  
+
       const response = await fetch(`/api/delete?userId=${userId}&id=${id}`, {
         method: 'DELETE',
-      });
-  
+      })
+
       if (response.ok) {
-        console.log("Record deleted successfully");
-        //@ts-ignore
-        setRecords(records.filter(record => record.id !== id));
+        console.log("Record deleted successfully")
+        setRecords(records.filter(record => record.id !== id))
       } else {
-        const errorData = await response.json();
-        console.error("Error deleting record:", errorData.error);
+        const errorData = await response.json()
+        console.error("Error deleting record:", errorData.error)
       }
     } catch (error) {
-      console.error("Error in delete request:", error);
+      console.error("Error in delete request:", error)
     }
-  };
-  
-  
+  }
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
-      setCurrentPage(newPage);
+      setCurrentPage(newPage)
     }
-  };
-
-  // if (loading) return <p className="text-center text-white">Loading...</p>;
+  }
 
   return (
-    <div className="h-screen grid grid-cols-[218px_1fr] bg-black">
-      <Sidebar />
-      <div className="p-8 text-white">
-        <h1 className="text-2xl font-semibold mb-6">Recent Soniks</h1>
+    <div className="space-y-4 md:space-y-6 p-4 md:p-6 bg-fuchsia-300 min-h-screen">
+      <h2 className="text-2xl md:text-4xl font-bold text-blue-600">Recent Soniks</h2>
 
-        <div className="relative mb-6">
-          <Input 
-            type="text" 
-            placeholder="Search Soniks..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pr-10 w-full rounded border"
-          />
-          <LucideSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-        </div>
+      <div className="relative">
+        <Input
+          type="text"
+          placeholder="Search Soniks..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pr-10 w-full border-4 border-blue-600 bg-yellow-200 text-blue-600 placeholder-blue-400 text-sm md:text-base"
+        />
+        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-600" />
+      </div>
 
-        <div className="bg-white shadow-md rounded-lg overflow-hidden text-black">
-          <Table className="w-full">
-            <TableCaption className="p-4 bg-gray-50 text-black">
-              A list of your recent Soniks.
-            </TableCaption>
-            <TableHeader className="bg-gray-100">
-              <TableRow>
-                <TableHead className="w-[150px] p-4">File Name</TableHead>
-                <TableHead className="w-[300px] p-4">Input Text</TableHead>
-                <TableHead className="p-4">Date Processed</TableHead>
-                <TableHead className="p-4">Status</TableHead>
-                <TableHead className="text-right p-4">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedRecords.length > 0 ? (
-                paginatedRecords.map((record: any) => (
-                  <TableRow key={record.id} className="hover:bg-gray-50">
-                    <TableCell className="font-medium p-4">
-                      {truncateText(record.fileUrl.split('/').pop(), 20)}
+      {loading ? (
+        <p className="text-center text-xl md:text-2xl text-blue-600">Loading...</p>
+      ) : (
+        <>
+          <div className="border-4 border-blue-600 bg-yellow-200 rounded-lg overflow-x-auto">
+            <Table>
+              <TableCaption className="bg-blue-600 text-yellow-200 p-2 text-base md:text-lg">
+                List of your recent Soniks
+              </TableCaption>
+              <TableHeader className="bg-blue-600">
+                <TableRow>
+                  <TableHead className="text-yellow-200 font-bold text-sm md:text-base whitespace-nowrap">File Name</TableHead>
+                  <TableHead className="text-yellow-200 font-bold text-sm md:text-base whitespace-nowrap">Input Text</TableHead>
+                  <TableHead className="text-yellow-200 font-bold text-sm md:text-base whitespace-nowrap">Date Processed</TableHead>
+                  <TableHead className="text-yellow-200 font-bold text-sm md:text-base whitespace-nowrap">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedRecords.map((record) => (
+                  <TableRow key={record.id} className="border-t-2 border-blue-600">
+                    <TableCell className="font-medium text-blue-600 text-sm md:text-base break-all">{record.fileUrl.split('/').pop()}</TableCell>
+                    <TableCell className="text-blue-600 text-sm md:text-base break-all">  {record.inputText.length > 50 ? record.inputText.slice(0, 50) + '...' : record.inputText}
                     </TableCell>
-                    <TableCell className="p-4">
-                      {truncateText(record.inputText, 50)}
-                    </TableCell>
-                    <TableCell className="p-4">
-                      {new Date(record.createdAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="p-4">Completed</TableCell>
-                    <TableCell className="text-right p-4">
-                      <button 
-                        onClick={() => handleDelete(record.id)} 
-                        className="text-red-500"
+                    <TableCell className="text-blue-600 text-sm md:text-base whitespace-nowrap">{new Date(record.createdAt).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <Button
+                        onClick={() => handleDelete(record.id)}
+                        variant="ghost"
+                        size="sm"
+                        className="text-blue-600 hover:text-fuchsia-500 hover:bg-yellow-300"
                       >
-                        <LucideTrash2 size={20} className='text-black mr-4' />
-                      </button>
+                        <Trash2 className="h-4 w-4 md:h-5 md:w-5" />
+                      </Button>
                     </TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center p-4">No records found.</TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
 
-        <div className="mt-6 flex justify-center">
           <Pagination>
-            <PaginationContent>
+            <PaginationContent className="flex flex-wrap justify-center gap-2">
               <PaginationItem>
-                <PaginationPrevious 
-                  href="#" 
-                  onClick={() => handlePageChange(currentPage - 1)} 
+                <PaginationPrevious
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  className={`bg-blue-600 text-yellow-200 border-2 border-yellow-200 text-sm md:text-base ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-fuchsia-500'}`}
                 />
               </PaginationItem>
-
               {Array.from({ length: totalPages }, (_, i) => (
                 <PaginationItem key={i}>
-                  <PaginationLink 
-                    href="#" 
-                    onClick={() => handlePageChange(i + 1)} 
-                    isActive={i + 1 === currentPage}
+                  <PaginationLink
+                    onClick={() => handlePageChange(i + 1)}
+                    className={`${currentPage === i + 1 ? 'bg-fuchsia-500' : 'bg-blue-600'} text-yellow-200 border-2 border-yellow-200 hover:bg-fuchsia-500 text-sm md:text-base`}
                   >
                     {i + 1}
                   </PaginationLink>
                 </PaginationItem>
               ))}
-
-              {totalPages > 3 && <PaginationEllipsis />}
-
               <PaginationItem>
-                <PaginationNext 
-                  href="#" 
-                  onClick={() => handlePageChange(currentPage + 1)} 
+                <PaginationNext
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  className={`bg-blue-600 text-yellow-200 border-2 border-yellow-200 text-sm md:text-base ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-fuchsia-500'}`}
                 />
               </PaginationItem>
             </PaginationContent>
           </Pagination>
-        </div>
-      </div>
+        </>
+      )}
     </div>
-  );
+  )
 }
-
-export default RecordsPage;

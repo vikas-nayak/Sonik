@@ -6,7 +6,7 @@ async function page() {
   const user = await checkUser();
 
   return (
-    <div></div>
+    <div><DashboardPage/></div>
   )
 }
 

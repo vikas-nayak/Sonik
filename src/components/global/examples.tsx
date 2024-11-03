@@ -54,7 +54,8 @@ const VoiceExamplesTable: React.FC<VoiceExamplesTableProps> = ({ onTextClick, on
   }, [audioElement]);
 
   return (
-    <div className="mt-8 w-full max-w-md mx-auto">
+    <div className="mt-4 w-full max-w-md mx-auto">
+      <h2 className="text-2xl font-bold text-blue-600 p-2 justify-center flex">Examples to Try</h2>
       <div className="border-2 border-blue-600 rounded-lg overflow-hidden">
         <table className="w-full bg-yellow-200">
           <thead>

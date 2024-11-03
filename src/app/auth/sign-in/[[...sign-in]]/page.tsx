@@ -94,7 +94,7 @@ export default function RedesignedSignInPage() {
                           </Button>
                         </SignIn.Action>
                         <Button variant="link" size="sm" asChild className="text-yellow-200 hover:text-yellow-300">
-                          <Link href="/sign-up">Do not have an account? Sign up</Link>
+                          <Link href="/auth/sign-up">Do not have an account? Sign up</Link>
                         </Button>
                       </CardFooter>
                     </Card>

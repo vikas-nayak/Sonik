@@ -159,17 +159,17 @@ export default function LandingPage() {
               {
                 icon: Mic,
                 title: "AI Voice Morphing",
-                description: "Transform your voice into any character or persona. Our advanced AI algorithms can modify pitch, tone, and accent."
+                description: "Transform your voice into any character or persona. Instantly transform your text into speech with our AI-powered voice generator."
               },
               {
                 icon: Users,
                 title: "Voice Cloning",
-                description: "Create a perfect digital copy of any voice with just a few minutes of sample audio. Ideal for personalized content."
+                description: "Create a perfect digital copy of any voice with just a few minutes of sample audio. Create realistic voice clones for your projects, utilizing cutting-edge AI technology"
               },
               {
                 icon: Globe,
                 title: "Real-time Translation",
-                description: "Break language barriers instantly. Our AI translates and dubs your content in real-time, maintaining the original tone."
+                description: "Break language barriers instantly. Our text-to-speech generator turns text into lifelike voiceovers suitable for any content."
               }
             ].map((feature, i) => (
               <div key={i} className="relative group">
@@ -227,7 +227,7 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-fuchsia-500/20 to-blue-600/20"></div>
         <div className="max-w-7xl mx-auto relative">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-yellow-200 text-center mb-16">
-            Simple Pricing
+          Affordable Pricing for AI Voice and Text-to-Speech Solutions
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
@@ -275,7 +275,7 @@ export default function LandingPage() {
             <h3 className="text-2xl sm:text-3xl font-bold text-yellow-200 mb-6">Sonik</h3>
             <div className="space-y-4 text-yellow-100">
               <p className="text-sm sm:text-base">
-                Lorem ipsum dolor sit, amet consectetur adipisicing elit. Temporibus, consequuntur ipsam! Dolorum recusandae saepe nisi, sed labore quidem consectetur tenetur, asperiores ab ratione excepturi laboriosam maiores architecto necessitatibus impedit amet provident esse. Error quisquam repellat velit dicta a laudantium doloremque doloribus cum unde similique atque sunt ipsa, harum quos aliquid.
+              Follow SonikAI for updates on AI-generated voices, voice cloning technology, and more. Join us on our journey in the evolving world of AI-powered audio. Lorem ipsum dolor sit, amet consectetur adipisicing elit. Error quisquam repellat velit dicta a laudantium doloremque doloribus cum unde similique atque sunt ipsa, harum quos aliquid.
               </p>
             </div>
           </div>

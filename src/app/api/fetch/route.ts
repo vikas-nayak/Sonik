@@ -14,11 +14,19 @@ export async function GET(req: NextRequest) {
     const audioData = await db.audioFile.findMany({
       where: { userId },
       include: {
-        predictions: true, 
+        predictions: true,
       },
     });
 
-    return NextResponse.json(audioData, { status: 200 });
+    const responseData = audioData.map((record) => ({
+      id: record.id,
+      fileUrl: record.fileUrl,
+      inputText: record.inputText,
+      createdAt: record.createdAt.toISOString(),
+      predictionUrl: record.predictions.length > 0 ? record.predictions[0].predictionUrl : null,
+    }));
+
+    return NextResponse.json(responseData, { status: 200 });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: 'Failed to fetch audio data' }, { status: 500 });

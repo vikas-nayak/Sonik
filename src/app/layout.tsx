@@ -2,17 +2,11 @@ import type { Metadata } from "next"
 import { DM_Sans } from "next/font/google"
 import { ClerkProvider } from '@clerk/nextjs'
 import "./globals.css"
-import Head from "next/head"
-
-
-
+import Script from 'next/script'
 
 const font = DM_Sans({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-
-
-
   metadataBase: new URL("https://sonikai.vercel.app/"),
   keywords: [
     "ai voice generator",
@@ -46,6 +40,20 @@ export const metadata: Metadata = {
   ],
   title: "Sonik - AI-Powered Voice Morpher",
   description: "Generate and clone human-like voices with AI. Create voiceovers, voice changers, and more with Sonik's AI voice generator.",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true
+    }
+  },
+  verification: {
+    google: "bqU9EeOff6xDVeDvMhJ9fQU6Rep_7pSlTD0lLbuBS5A"
+  },
+  icons: {
+    icon: "/favicon.ico"
+  }
 };
 
 export default function RootLayout({
@@ -54,10 +62,10 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <>
-      <Head>
-        <meta name="google-site-verification" content="bqU9EeOff6xDVeDvMhJ9fQU6Rep_7pSlTD0lLbuBS5A" />
-        <script
+    <html lang="en">
+      <head>
+        <Script
+          id="schema-org"
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
@@ -76,15 +84,12 @@ export default function RootLayout({
             })
           }}
         />
-      </Head>
-
-      <ClerkProvider>
-        <html lang="en">
-          <body className={`${font.className} min-h-screen bg-blue-600`}>
-            {children}
-          </body>
-        </html>
-      </ClerkProvider>
-    </>
-  )
+      </head>
+      <body className={`${font.className} min-h-screen bg-blue-600`}>
+        <ClerkProvider>
+          {children}
+        </ClerkProvider>
+      </body>
+    </html>
+  );
 }

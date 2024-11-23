@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /dashboard
+
+User-agent: *
+Allow: /
+
+Sitemap: https://sonikai.verce.app/sitemap.xml

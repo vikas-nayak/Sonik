@@ -2,63 +2,62 @@ import { db } from "@/lib/db";
 import { getAuth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { client } from "@gradio/client";
-
-// Define interfaces for the prediction result
-interface PredictionData {
-  url: string;
-  // Add other properties if they exist in the prediction data
-}
-
-interface GradioResponse {
-  data: PredictionData[];
-}
+import { put } from "@vercel/blob";
 
 export async function POST(req: NextRequest) {
   try {
     const { userId }: { userId: string | null } = getAuth(req);
-    if (!userId) {
-      throw new Error('User not authenticated');
-    }
+    if (!userId) throw new Error("User not authenticated");
 
     const formData = await req.formData();
-    const audioFile = formData.get('audioFile') as File;
-    const inputText = formData.get('inputText') as string;
+    const audioFile = formData.get("audioFile") as File;
+    const inputText = formData.get("inputText") as string;
 
-    if (!audioFile || !inputText) {
-      throw new Error('Missing audio file or input text');
-    }
+    if (!audioFile || !inputText) throw new Error("Missing audio file or input text");
 
-    const app = await client("tonyassi/voice-clone");
-    const result = await app.predict("/predict", [inputText, audioFile]) as GradioResponse;
-    const predictionData = result.data[0];
-    const predictionUrl = predictionData.url;
-    
-    if (!predictionUrl) {
-      throw new Error('No prediction URL returned from Gradio');
-    }
+    const audioBlob = new Blob([await audioFile.arrayBuffer()], { type: audioFile.type });
 
-    // AudioFile save karo
+    const app = await client("https://tonyassi-voice-clone.hf.space/");
+    const result = await app.predict("/predict", [inputText, audioBlob]);
+    console.log("Gradio result:", result);
+
+    const predictionPath = result?.data?.[0]?.path;
+    if (!predictionPath) throw new Error("No prediction path returned from Gradio");
+
+    const gradioBaseUrl = "https://tonyassi-voice-clone.hf.space";
+    const audioResponse = await fetch(gradioBaseUrl + predictionPath);
+    if (!audioResponse.ok) throw new Error("Failed to fetch generated audio from Gradio");
+
+    const generatedBuffer = await audioResponse.arrayBuffer();
+    const generatedBlob = new Blob([generatedBuffer], { type: "audio/wav" });
+
+    // Upload to Vercel Blob
+    const fileName = `clone-${Date.now()}.wav`;
+    const { url: uploadedUrl } = await put(fileName, generatedBlob, {
+      access: "public", // or "private" if needed
+    });
+
+    // Save in DB
     const audioFileEntry = await db.audioFile.create({
       data: {
         userId,
         fileUrl: audioFile.name,
-        inputText
-      }
-    });
-
-    // Prediction save karo
-    await db.prediction.create({
-      data: {
-        audioFileId: audioFileEntry.id,
-        predictionUrl: predictionUrl,
+        inputText,
       },
     });
 
-    return NextResponse.json({ predictionUrl });
+    await db.prediction.create({
+      data: {
+        audioFileId: audioFileEntry.id,
+        predictionUrl: uploadedUrl,
+      },
+    });
+
+    return NextResponse.json({ predictionUrl: uploadedUrl });
   } catch (error) {
     console.error("Error:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error occurred" }, 
+      { error: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }
